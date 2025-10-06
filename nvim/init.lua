@@ -1,9 +1,13 @@
 -- set leader keys before anything else
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+vim.opt.timeoutlen = 2000 -- better timeout lenght
 
 -- load vim options for defaults
 require('options')
+
+-- load vim autoclose for closing quotes and paretheses
+require('autoclose').setup()
 
 -- plugins
 -- lazy.nvim setup

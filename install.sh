@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 #!/usr/bin/env bash
 
-# --- Charlyder macOS install script ---
+# --- Charfiles:macOS install script ---
 #
 # date created: 08.29.2025
 
@@ -20,20 +19,19 @@ install_gum() {
 # install gum if missing
 install_gum
 
-# --- package manager ---
+# --- package manager:homebrew ---
 # install Homebrew on to the system
 if command -v brew &> /dev/null; then
     echo "✅ Homebrew is already installed."
 else
     echo "🚀 Homebrew not found. Installing..."
     
-    # Download the installer script first
+    # download the installer script first
     gum spin --spinner dot --title "Downloading Homebrew installer..." -- \
         curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o /tmp/homebrew_install.sh
     
-    # Run the installer (needs to be interactive)
-    echo "Running Homebrew installer..."
-    /bin/bash /tmp/homebrew_install.sh
+    # run the installer (needs to be interactive)
+    gum spin --spinner dot --title "Running Homebrew installer..." -- /bin/bash /tmp/homebrew_install.sh
     
     # Clean up
     rm -f /tmp/homebrew_install.sh
@@ -54,63 +52,31 @@ fi
 # install Homebrew files
 brew bundle
 
-# --- configuration ---
+# --- configuration:.config ---
 # make syslinks for config
+gum spin --spinner dot --title "Checking for configuration files "
+
 if [ ! -d ~/.config ]; then
-    gum spin --spinner dot --title "Creating Config folder..." -- mkdir ~/.config
+    gum spin --spinner dot --title "Creating Config folder..." -- /bin/bash/ mkdir ~/.config
     sleep 1
 else
     echo "✅ Config directory already exists!"
 fi
-=======
-#!/bin/bash
-# Dotfiles installation script using GNU Stow
-# Author: Charlynder
 
-set -e
-
-DOTFILES_DIR="$HOME/development/dotfiles"
-TARGET_DIR="$HOME"
-
-echo "🏠 Installing dotfiles using GNU Stow..."
-
-# Check if stow is installed
-if ! command -v stow &> /dev/null; then
-    echo "❌ GNU Stow is not installed. Please install it first:"
-    echo "   brew install stow"
-    exit 1
+# --- configuration:Charfiles ---
+# make charfiles directory
+if [ -d ~/.charfiles ]; then
+        gum spin --spinner dot --title "Making Charfiles directory..." -- /bin/bash/ mkdir -p ~/.charfile && git clone https://github.com/Charlynder/Charfiles.git ~/.charfile
+        sleep 1
+else
+        echo "Charfiles directory has already been created ✅"
 fi
 
-# Change to dotfiles directory
-cd "$DOTFILES_DIR"
+# --- configuration:Edits ---
+# remove the install script from the installation
+rf -rf ~/.charfiles/install.sh
 
-# List of packages to stow
-PACKAGES=(
-    "zsh"
-    "git" 
-    "nvim"
-    "tmux"
-    "ghostty"
-    "fastfetch"
-    "oh-my-zsh"
-)
+# --- configuration:Links ---
+# make links for configurations
+gum spin --spinner dot --title "Creating links for configuration file..." -- /bin/bash/ ln -s ~/.charfile/*/ ~/.config/ \
 
-echo "📦 Stowing packages:"
-
-for package in "${PACKAGES[@]}"; do
-    if [ -d "$package" ]; then
-        echo "  ✓ Stowing $package"
-        stow --target="$TARGET_DIR" "$package"
-    else
-        echo "  ⚠️  Package $package not found, skipping"
-    fi
-done
-
-echo ""
-echo "✅ Dotfiles installation complete!"
-echo ""
-echo "📝 Next steps:"
-echo "   • Restart your terminal or run 'exec zsh'"
-echo "   • Make sure your PATH includes ~/development/dotfiles/bin if you have custom scripts"
-echo ""
->>>>>>> 2dc083c (feat: ghostty theme update for Tahoe)

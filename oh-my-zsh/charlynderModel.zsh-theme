@@ -8,7 +8,7 @@ function tmuxbolt {
 }
 
 function cancer {
-    echo -n "♋︎"
+    echo -n "\u264B\uFE0E"
 }
 
 ARROW_DIRECTION="»"  # Default arrow direction
