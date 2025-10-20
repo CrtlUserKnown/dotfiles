@@ -1,7 +1,0 @@
-crystal.x86_64 
-zoxide.x86_64 
-fzf.x86_64 
-mysql-workbench-community.x86_64 
-zoxide.x86_64 
-gh.x86_64 
-zsh.x86_64

@@ -1,5 +1,20 @@
 local harpoon = require("harpoon")
-harpoon:setup()
+harpoon:setup({
+    settings = {
+        save_on_toggle = true,
+        sync_on_ui_close = true,
+    },
+    -- UI customization
+    menu = {
+        width = vim.api.nvim_win_get_width(0) - 4,
+        height = 10,
+        borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }, -- Rounded corners
+        -- Other border options:
+        -- borderchars = { "━", "┃", "━", "┃", "┏", "┓", "┛", "┗" }, -- Thick borders
+        -- borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" }, -- Simple corners
+        -- borderchars = { " ", " ", " ", " ", " ", " ", " ", " " }, -- No border
+    },
+})
 
 -- Add file to harpoon
 vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end, { desc = "Add file to Harpoon" })
