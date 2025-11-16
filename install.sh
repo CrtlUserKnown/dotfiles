@@ -134,9 +134,9 @@ EOF
 
     # --- configuration:Prompts ---
     # prompt user for which prompt theme to use
-    # list of available themes from the ./zsh/themes directory
-    if [ -d "./zsh/themes" ]; then
-        available_themes=($(ls ./zsh/themes))
+    # list of available themes from the ./src/zsh/themes directory
+    if [ -d "./src/zsh/themes" ]; then
+        available_themes=($(ls ./src/zsh/themes))
         if [ ${#available_themes[@]} -gt 0 ]; then
             # Create theme descriptions
             theme_options=()
@@ -172,15 +172,26 @@ EOF
 EOF
             fi
         else
-            echo "⚠️ No themes found in ./zsh/themes directory."
+            echo "⚠️ No themes found in ./src/zsh/themes directory."
         fi
     else
-        echo "⚠️ Theme directory ./zsh/themes not found. Skipping theme selection."
+        echo "⚠️ Theme directory ./src/zsh/themes not found. Skipping theme selection."
     fi
 
     # --- configuration:Links ---
     # make links for configurations
-    gum spin --spinner dot --title "Creating links for configuration files..." -- bash -c "ln -sf ~/.charfiles/*/ ~/.config/"
+    gum spin --spinner dot --title "Creating links for configuration files..." -- bash -c '
+        # Create symlinks for .config directories
+        ln -sf ~/.charfiles/src/bat ~/.config/bat
+        ln -sf ~/.charfiles/src/fastfetch ~/.config/fastfetch
+        ln -sf ~/.charfiles/src/ghostty ~/.config/ghostty
+        ln -sf ~/.charfiles/src/tmux ~/.config/tmux
+        ln -sf ~/.charfiles/src/nvim ~/.config/nvim
+        
+        # Create symlinks for home directory
+        ln -sf ~/.charfiles/src/zim ~/.zim
+        ln -sf ~/.charfiles/src/zsh ~/.zsh
+    '
     sleep 1
 
     # --- verification:Check ---
