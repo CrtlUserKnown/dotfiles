@@ -16,8 +16,6 @@ require('options')
 -- load keymaps for editor
 require('keymaps')
 
--- load lsp for editor
-require('lsp-config')
 
 -- load telescope find & replace configuration
 -- require('telescope-replace-config').setup()
@@ -50,3 +48,14 @@ end
 
 vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+
+-- Fallback for Crystal syntax highlighting if Tree-sitter is still failing
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "crystal",
+    callback = function()
+        -- Only set if current syntax highlighting is generic (no filetype)
+        if vim.bo.syntax == 'on' or vim.bo.syntax == 'crystal' then
+            vim.cmd("set syntax=ruby")
+        end
+    end
+})

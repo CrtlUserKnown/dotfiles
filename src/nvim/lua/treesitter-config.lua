@@ -5,10 +5,30 @@ if not status_ok then
   return
 end
 
+-- Add Crystal parser configuration
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.crystal = {
+  install_info = {
+    url = "https://github.com/crystal-lang-tools/tree-sitter-crystal",
+    files = { "src/parser.c", "src/scanner.c" },
+    branch = "main",
+    generate_requires_npm = false,
+    requires_generate_from_grammar = false,
+  },
+  filetype = "crystal",
+}
+
+vim.filetype.add({
+  extension = {
+    cr = 'crystal',
+  },
+})
+
 configs.setup({
   -- A list of parser names, or "all" (the five listed parsers should always be installed)
   ensure_installed = {
     "c",
+    "crystal",
     "lua",
     "vim",
     "vimdoc",

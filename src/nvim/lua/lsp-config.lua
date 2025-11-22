@@ -1,338 +1,284 @@
--- LSP Configuration for Neovim 0.11+
--- Using vim.lsp.config instead of deprecated lspconfig module
-
--- Use an on_attach function to only map the following keys
--- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
-    local bufopts = { noremap = true, silent = true, buffer = bufnr }
-
-    -- Enable completion triggered by <c-x><c-o>
-    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-    -- Enable inlay hints if the server supports it
-    if client.server_capabilities.inlayHintProvider then
-        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-    end
-
-    -- Keybindings
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-    vim.keymap.set('n', '<leader>k', vim.lsp.buf.signature_help, bufopts)
-    vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, bufopts)
-    vim.keymap.set('n', 'mr', vim.lsp.buf.rename, bufopts)
-    vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, bufopts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-    vim.keymap.set('n', '<leader>f', function() vim.lsp.buf.format { async = true } end, bufopts)
-
-    -- Toggle inlay hints
-    vim.keymap.set('n', '<leader>ih', function()
-        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
-    end, { buffer = bufnr, desc = 'Toggle inlay hints' })
-
-    -- Diagnostic keymaps
-    vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, bufopts)
-    vim.keymap.set('n', ']d', vim.diagnostic.goto_next, bufopts)
-    vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, bufopts)
-    vim.keymap.set('n', '<leader>dl', vim.diagnostic.setloclist, bufopts)
+    local opts = { noremap = true, silent = true }
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+    vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
+    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
+    vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+    vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 end
 
--- Format on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.css", "*.html", "*.json", "*.py", "*.rs", "*.go", "*.lua" },
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+local lspconfig = require('lspconfig')
+
+local handlers = {
+    -- Default handler for servers without a specific override
+    function(server_name)
+        lspconfig[server_name].setup {
+            on_attach = on_attach,
+            capabilities = capabilities,
+        }
+    end,
+
+    -- Custom handler for jdtls
+    ['jdtls'] = function()
+        lspconfig.jdtls.setup(vim.tbl_deep_extend('force', {
+            on_attach = on_attach,
+            capabilities = capabilities,
+        }, {
+            filetypes = { 'java' },
+            -- Root directory detection for Maven, Gradle, Ant, or Git
+            root_dir = vim.fs.root(0, {
+                'build.xml',      -- Ant
+                'pom.xml',        -- Maven
+                'build.gradle',   -- Gradle
+                'build.gradle.kts', -- Gradle Kotlin DSL
+                'settings.gradle', -- Gradle multi-project
+                'settings.gradle.kts',
+                '.git'
+            }),
+            on_attach = function(client, bufnr)
+                on_attach(client, bufnr)
+                vim.lsp.inlay_hint(bufnr, true)
+            end,
+            settings = {
+                java = {
+                    -- Eclipse JDT Language Server Configuration
+                    eclipse = {
+                        downloadSources = true,
+                    },
+                    configuration = {
+                        updateBuildConfiguration = "interactive",
+                        -- Support for different Java versions
+                        runtimes = {
+                            -- Add your Java installations here if needed
+                            -- {
+                            --     name = "JavaSE-17",
+                            --     path = "/path/to/jdk-17",
+                            -- },
+                        },
+                    },
+                    maven = {
+                        downloadSources = true,
+                        updateSnapshots = false,
+                    },
+                    -- Referenced libraries for all build systems
+                    project = {
+                        referencedLibraries = {
+                            -- Ant libraries
+                            "lib/**/*.jar",
+                            "**/lib/*.jar",
+                            -- Maven local repository
+                            vim.fn.expand("~/.m2/repository/**/*.jar"),
+                            -- Gradle cache
+                            vim.fn.expand("~/.gradle/caches/**/*.jar"),
+                            -- Common library patterns
+                            "target/**/*.jar",
+                            "build/libs/**/*.jar",
+                            "dist/**/*.jar",
+                        },
+                    },
+                    -- Inlay hints
+                    inlayHints = {
+                        parameterNames = {
+                            enabled = "all",
+                        },
+                    },
+                    implementationsCodeLens = {
+                        enabled = true,
+                    },
+                    referencesCodeLens = {
+                        enabled = true,
+                    },
+                    -- Import organization
+                    sources = {
+                        organizeImports = {
+                            starThreshold = 9999,
+                            staticStarThreshold = 9999,
+                        },
+                    },
+                    -- Code generation
+                    codeGeneration = {
+                        toString = {
+                            template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
+                        },
+                        hashCodeEquals = {
+                            useJava7Objects = true,
+                        },
+                        useBlocks = true,
+                    },
+                    -- Completion settings
+                    completion = {
+                        favoriteStaticMembers = {
+                            "org.junit.Assert.*",
+                            "org.junit.Assume.*",
+                            "org.junit.jupiter.api.Assertions.*",
+                            "org.junit.jupiter.api.Assumptions.*",
+                            "org.junit.jupiter.api.DynamicContainer.*",
+                            "org.junit.jupiter.api.DynamicTest.*",
+                            "org.mockito.Mockito.*",
+                            "org.mockito.ArgumentMatchers.*",
+                            "org.mockito.Answers.*",
+                        },
+                        filteredTypes = {
+                            "com.sun.*",
+                            "io.micrometer.shaded.*",
+                            "java.awt.*",
+                            "jdk.*",
+                            "sun.*",
+                        },
+                        importOrder = {
+                            "java",
+                            "javax",
+                            "com",
+                            "org",
+                        },
+                    },
+                    -- Format settings
+                    format = {
+                        enabled = true,
+                        settings = {
+                            url = vim.fn.stdpath("config") .. "/java-format.xml",
+                            profile = "GoogleStyle",
+                        },
+                    },
+                },
+            },
+        }))
+    end,
+}
+
+-- Auto-detect build system and set appropriate commands
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "java",
     callback = function()
-        vim.lsp.buf.format({ async = false })
-    end,
-})
-
--- Add additional capabilities supported by nvim-cmp
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-local cmp_lsp_ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
-if cmp_lsp_ok then
-    capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
-end
-
--- Configure diagnostic display (updated for Neovim 0.11+)
-vim.diagnostic.config({
-    virtual_text = true,
-    signs = {
-        text = {
-            [vim.diagnostic.severity.ERROR] = "✘",
-            [vim.diagnostic.severity.WARN] = "▲",
-            [vim.diagnostic.severity.HINT] = "⚑",
-            [vim.diagnostic.severity.INFO] = "»",
-        },
-    },
-    update_in_insert = false,
-    underline = true,
-    severity_sort = true,
-    float = {
-        border = 'rounded',
-        source = 'always',
-    },
-})
-
--- Helper function to setup LSP servers
-local function setup_server(name, config)
-    config = config or {}
-    config.on_attach = on_attach
-    config.capabilities = capabilities
-
-    vim.lsp.config(name, config)
-    vim.lsp.enable(name)
-end
-
--- Setup language servers using the new API
-
--- Lua
-setup_server('lua_ls', {
-    settings = {
-        Lua = {
-            runtime = {
-                version = 'LuaJIT',
-            },
-            diagnostics = {
-                globals = { 'vim' },
-            },
-            workspace = {
-                library = vim.api.nvim_get_runtime_file("", true),
-                checkThirdParty = false,
-            },
-            telemetry = {
-                enable = false,
-            },
-            hint = {
-                enable = true,
-                setType = true,
-                paramType = true,
-                paramName = 'All',
-                semicolon = 'All',
-                arrayIndex = 'Auto',
-            },
-        },
-    },
-})
-
--- Find and replace with popup
-vim.keymap.set('n', '<leader>sr', function()
-  local word = vim.fn.expand('<cword>')
-  vim.ui.input({ prompt = 'Find: ', default = word }, function(find)
-    if not find then return end
-    vim.ui.input({ prompt = 'Replace with: ' }, function(replace)
-      if not replace then return end
-      vim.ui.input({ prompt = 'Options (gc for confirm): ', default = 'gc' }, function(opts)
-        opts = opts or 'gc'
-        vim.cmd(string.format('%%s/%s/%s/%s', find, replace, opts))
-      end)
-    end)
-  end)
-end, { noremap = true, silent = true, desc = 'Find and replace with popup' })
-
--- Find and replace in visual selection with popup
-vim.keymap.set('v', '<leader>sr', function()
-  vim.ui.input({ prompt = 'Find: ' }, function(find)
-    if not find then return end
-    vim.ui.input({ prompt = 'Replace with: ' }, function(replace)
-      if not replace then return end
-      vim.ui.input({ prompt = 'Options (gc for confirm): ', default = 'gc' }, function(opts)
-        opts = opts or 'gc'
-        vim.cmd(string.format("'<,'>s/%s/%s/%s", find, replace, opts))
-      end)
-    end)
-  end)
-end, { noremap = true, silent = true, desc = 'Find and replace in selection with popup' })
-
--- LSP rename with popup (for refactoring variables)
-vim.keymap.set('n', '<leader>rn', function()
-  local current_name = vim.fn.expand('<cword>')
-  vim.ui.input({ 
-    prompt = string.format('Rename "%s" to: ', current_name),
-    default = current_name 
-  }, function(new_name)
-    if new_name and new_name ~= '' and new_name ~= current_name then
-      vim.lsp.buf.rename(new_name)
+        local root = vim.fs.root(0, {
+            'build.xml',
+            'pom.xml',
+            'build.gradle',
+            'build.gradle.kts',
+            'settings.gradle',
+            'settings.gradle.kts',
+        })
+        
+        if root then
+            -- Detect which build system is present
+            local build_file = nil
+            local build_system = nil
+            
+            if vim.fn.filereadable(root .. '/pom.xml') == 1 then
+                build_system = 'Maven'
+                build_file = 'pom.xml'
+            elseif vim.fn.filereadable(root .. '/build.gradle') == 1 or 
+                   vim.fn.filereadable(root .. '/build.gradle.kts') == 1 then
+                build_system = 'Gradle'
+                build_file = vim.fn.filereadable(root .. '/build.gradle') == 1 and 'build.gradle' or 'build.gradle.kts'
+            elseif vim.fn.filereadable(root .. '/build.xml') == 1 then
+                build_system = 'Ant'
+                build_file = 'build.xml'
+            end
+            
+            if build_system then
+                -- Set buffer-local variable for easy reference
+                vim.b.java_build_system = build_system
+                vim.b.java_build_file = build_file
+                vim.b.java_project_root = root
+                
+                -- Optional: Print build system detection
+                -- vim.notify("Detected " .. build_system .. " project at " .. root, vim.log.levels.INFO)
+            end
+        end
     end
-  end)
-end, { noremap = true, silent = true, desc = 'Rename symbol (LSP)' })
-
--- Python
-setup_server('pyright', {
-    settings = {
-        python = {
-            analysis = {
-                inlayHints = {
-                    variableTypes = true,
-                    functionReturnTypes = true,
-                },
-            },
-        },
-    },
 })
 
--- JavaScript/TypeScript
-setup_server('ts_ls', {
-    settings = {
-        typescript = {
-            inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-            },
-        },
-        javascript = {
-            inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-            },
-        },
-    },
+-- Add keybindings for building Java projects
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "java",
+    callback = function(args)
+        local bufnr = args.buf
+        local opts = { buffer = bufnr, noremap = true, silent = true }
+        
+        -- Build project based on detected build system
+        vim.keymap.set('n', '<leader>jb', function()
+            local build_system = vim.b.java_build_system
+            local root = vim.b.java_project_root
+            
+            if not build_system or not root then
+                vim.notify("No build system detected", vim.log.levels.WARN)
+                return
+            end
+            
+            local cmd
+            if build_system == 'Maven' then
+                cmd = 'cd ' .. root .. ' && mvn compile'
+            elseif build_system == 'Gradle' then
+                cmd = 'cd ' .. root .. ' && ./gradlew build'
+            elseif build_system == 'Ant' then
+                cmd = 'cd ' .. root .. ' && ant compile'
+            end
+            
+            if cmd then
+                vim.cmd('split | terminal ' .. cmd)
+            end
+        end, vim.tbl_extend('force', opts, { desc = 'Build Java project' }))
+        
+        -- Run tests
+        vim.keymap.set('n', '<leader>jt', function()
+            local build_system = vim.b.java_build_system
+            local root = vim.b.java_project_root
+            
+            if not build_system or not root then
+                vim.notify("No build system detected", vim.log.levels.WARN)
+                return
+            end
+            
+            local cmd
+            if build_system == 'Maven' then
+                cmd = 'cd ' .. root .. ' && mvn test'
+            elseif build_system == 'Gradle' then
+                cmd = 'cd ' .. root .. ' && ./gradlew test'
+            elseif build_system == 'Ant' then
+                cmd = 'cd ' .. root .. ' && ant test'
+            end
+            
+            if cmd then
+                vim.cmd('split | terminal ' .. cmd)
+            end
+        end, vim.tbl_extend('force', opts, { desc = 'Run Java tests' }))
+        
+        -- Clean project
+        vim.keymap.set('n', '<leader>jc', function()
+            local build_system = vim.b.java_build_system
+            local root = vim.b.java_project_root
+            
+            if not build_system or not root then
+                vim.notify("No build system detected", vim.log.levels.WARN)
+                return
+            end
+            
+            local cmd
+            if build_system == 'Maven' then
+                cmd = 'cd ' .. root .. ' && mvn clean'
+            elseif build_system == 'Gradle' then
+                cmd = 'cd ' .. root .. ' && ./gradlew clean'
+            elseif build_system == 'Ant' then
+                cmd = 'cd ' .. root .. ' && ant clean'
+            end
+            
+            if cmd then
+                vim.cmd('split | terminal ' .. cmd)
+            end
+        end, vim.tbl_extend('force', opts, { desc = 'Clean Java project' }))
+    end
 })
 
--- Rust
-setup_server('rust_analyzer', {
-    settings = {
-        ['rust-analyzer'] = {
-            checkOnSave = {
-                command = "clippy",
-            },
-            inlayHints = {
-                bindingModeHints = {
-                    enable = true,
-                },
-                chainingHints = {
-                    enable = true,
-                },
-                closingBraceHints = {
-                    minLines = 25,
-                },
-                closureReturnTypeHints = {
-                    enable = "always",
-                },
-                lifetimeElisionHints = {
-                    enable = "always",
-                    useParameterNames = true,
-                },
-                maxLength = 25,
-                parameterHints = {
-                    enable = true,
-                },
-                reborrowHints = {
-                    enable = "always",
-                },
-                renderColons = true,
-                typeHints = {
-                    enable = true,
-                    hideClosureInitialization = false,
-                    hideNamedConstructor = false,
-                },
-            },
-        },
-    },
-})
-
--- Go
-setup_server('gopls', {
-    settings = {
-        gopls = {
-            hints = {
-                assignVariableTypes = true,
-                compositeLiteralFields = true,
-                compositeLiteralTypes = true,
-                constantValues = true,
-                functionTypeParameters = true,
-                parameterNames = true,
-                rangeVariableTypes = true,
-            },
-        },
-    },
-})
-
--- C/C++
-setup_server('clangd', {
-    filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
-    cmd = {
-        "clangd",
-        "--background-index",
-        "--clang-tidy",
-        "--header-insertion=iwyu",
-        "--completion-style=detailed",
-        "--function-arg-placeholders",
-        "--fallback-style=llvm",
-        "--inlay-hints",
-    },
-    settings = {
-        clangd = {
-            InlayHints = {
-                Designators = true,
-                Enabled = true,
-                ParameterNames = true,
-                DeducedTypes = true,
-            },
-        },
-    },
-})
-
--- HTML
-setup_server('html')
-
--- CSS
-setup_server('cssls')
-
--- JSON
-setup_server('jsonls')
-
--- Java
-setup_server('jdtls', {
-    filetypes = { 'java' },
-    on_attach = function(client, bufnr)
-        on_attach(client, bufnr)
-        -- Force enable inlay hints for jdtls
-        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-    end,
-    settings = {
-        java = {
-            inlayHints = {
-                parameterNames = {
-                    enabled = "all",
-                },
-            },
-            implementationsCodeLens = {
-                enabled = true,
-            },
-            referencesCodeLens = {
-                enabled = true,
-            },
-        },
-    },
-})
-
--- Bash
-setup_server('bashls')
-
--- Swift
-setup_server('sourcekit', {
-    cmd = { 'sourcekit-lsp' },
-    settings = {
-        sourcekit = {
-            inlayHints = {
-                enabled = true,
-            },
-        },
-    },
-})
-
--- Crystal
-setup_server('crystalline', {
-    cmd = { 'crystalline' },
-    filetypes = { 'crystal' },
-})
+return {
+    on_attach = on_attach,
+    handlers = handlers,
+}

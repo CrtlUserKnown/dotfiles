@@ -56,9 +56,6 @@ return {
     {
         'nvim-treesitter/nvim-treesitter',
         build = ':TSUpdate',
-        config = function()
-            require('treesitter-config')
-        end,
     },
 
     -- Mason (LSP/DAP/Linter installer)
@@ -77,20 +74,41 @@ return {
         end,
     },
 
-    {
-        'williamboman/mason-lspconfig.nvim',
-        dependencies = { 'williamboman/mason.nvim' },
-        config = function()
-            require('mason-lspconfig').setup({
-                ensure_installed = {
-                    'lua_ls',
-                    'pyright',
-                    'ts_ls',
-                },
-                automatic_installation = true,
-            })
-        end,
-    },
+            {
+
+                'williamboman/mason-lspconfig.nvim',
+
+                dependencies = { 'williamboman/mason.nvim', 'neovim/nvim-lspconfig' },
+
+                config = function()
+
+                    local lsp_config = require('lsp-config')
+
+        
+
+                    require('mason-lspconfig').setup({
+
+                        ensure_installed = {
+
+                            'lua_ls',
+
+                            'pyright',
+
+                            'ts_ls',
+
+                            'jdtls',
+
+                        },
+
+                        automatic_installation = true,
+
+                        handlers = lsp_config.handlers,
+
+                    })
+
+                end,
+
+            },
 
 
     -- Refactoring

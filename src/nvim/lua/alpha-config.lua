@@ -58,6 +58,9 @@ dashboard.section.buttons.val = {
     dashboard.button("q", "  Quit", ":qa<CR>"),
 }
 
+-- goto dashboard
+vim.keymap.set('n', '<leader>d', ':Alpha<CR>', { desc = 'Go to Dashboard'})
+
 -- Set footer
 local function footer()
     local datetime = os.date(" %d-%m-%Y   %H:%M:%S")

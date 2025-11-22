@@ -12,7 +12,7 @@ adjust-cell-height = 0
 
 # --- Terminal behavior ---
 shell-integration = zsh
-shell-integration-features = cursor,sudo,title
+shell-integration-features = no-cursor,sudo,title
 
 # --- Theme ---
 theme = "Cursor Dark"
@@ -24,7 +24,7 @@ background-opacity = 0.8
 background = 191724
 foreground = e0def4
 
-cursor-color = 524f67
+# cursor-color = #524f67
 selection-background = 2a273f
 selection-foreground = e0def4
 
