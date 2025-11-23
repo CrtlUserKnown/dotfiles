@@ -1,5 +1,11 @@
 local on_attach = function(client, bufnr)
-    local opts = { noremap = true, silent = true }
+    local opts = { noremap = true, silent = true, buffer = bufnr }
+    
+    -- Enable inlay hints if the server supports it
+    if client.server_capabilities.inlayHintProvider then
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+    end
+    
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
@@ -12,10 +18,49 @@ local on_attach = function(client, bufnr)
     vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
     vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
     vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+    
+    -- Toggle inlay hints with a keybinding
+    vim.keymap.set('n', '<leader>ih', function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
+    end, { buffer = bufnr, desc = 'Toggle inlay hints' })
 end
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local lspconfig = require('lspconfig')
+-- Only proceed if lspconfig is available
+local lspconfig_ok, lspconfig = pcall(require, 'lspconfig')
+if not lspconfig_ok then
+    return {
+        on_attach = on_attach,
+        handlers = {},
+    }
+end
+
+-- Safely load capabilities
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
+if cmp_nvim_lsp_ok then
+    capabilities = cmp_nvim_lsp.default_capabilities()
+end
+
+-- Configure sourcekit-lsp using the new vim.lsp API
+vim.lsp.config('sourcekit-lsp', {
+    cmd = { 'sourcekit-lsp' },
+    filetypes = { 'swift', 'c', 'cpp', 'objective-c', 'objective-cpp' },
+    root_markers = { 'Package.swift', 'compile_commands.json', '.git' },
+    capabilities = capabilities,
+})
+
+-- Auto-start sourcekit-lsp for Swift files
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'swift', 'c', 'cpp', 'objective-c', 'objective-cpp' },
+    callback = function(args)
+        vim.lsp.enable('sourcekit-lsp')
+        -- Call on_attach manually since we're using the new API
+        local clients = vim.lsp.get_clients({ bufnr = args.buf, name = 'sourcekit-lsp' })
+        if #clients > 0 then
+            on_attach(clients[1], args.buf)
+        end
+    end,
+})
 
 local handlers = {
     -- Default handler for servers without a specific override
@@ -26,7 +71,34 @@ local handlers = {
         }
     end,
 
-    -- Custom handler for jdtls
+    -- Custom handler for gopls (Go)
+    ['gopls'] = function()
+        lspconfig.gopls.setup {
+            on_attach = on_attach,
+            capabilities = capabilities,
+            settings = {
+                gopls = {
+                    analyses = {
+                        unusedparams = true,
+                        shadow = true,
+                    },
+                    staticcheck = true,
+                    gofumpt = true,
+                    hints = {
+                        assignVariableTypes = true,
+                        compositeLiteralFields = true,
+                        compositeLiteralTypes = true,
+                        constantValues = true,
+                        functionTypeParameters = true,
+                        parameterNames = true,
+                        rangeVariableTypes = true,
+                    },
+                },
+            },
+        }
+    end,
+
+    -- Custom handler for jdtls (Java)
     ['jdtls'] = function()
         lspconfig.jdtls.setup(vim.tbl_deep_extend('force', {
             on_attach = on_attach,
@@ -34,7 +106,7 @@ local handlers = {
         }, {
             filetypes = { 'java' },
             -- Root directory detection for Maven, Gradle, Ant, or Git
-            root_dir = vim.fs.root(0, {
+            root_dir = lspconfig.util.root_pattern(
                 'build.xml',      -- Ant
                 'pom.xml',        -- Maven
                 'build.gradle',   -- Gradle
@@ -42,10 +114,11 @@ local handlers = {
                 'settings.gradle', -- Gradle multi-project
                 'settings.gradle.kts',
                 '.git'
-            }),
+            ),
             on_attach = function(client, bufnr)
                 on_attach(client, bufnr)
-                vim.lsp.inlay_hint(bufnr, true)
+                -- Force enable inlay hints for Java
+                vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
             end,
             settings = {
                 java = {

@@ -1,130 +1,194 @@
-# Char zshrc file
+# CharModel zsh theme
 #
-# date created: 10.14.2025
+# Date Created: 09.30.2025
+#
+# A dynamic zsh prompt theme with environment-aware styling and interactive arrow
+# indicators. Features different symbols for tmux (⚡) and standard shell (♋︎)
+# environments. Includes full git integration with branch display and real-time
+# status indicators for staged/unstaged changes. The arrow dynamically responds
+# to your actions: typing (»), deleting («), and navigating (↑↓). Styled with
+# Rosé Pine's purple color palette for a cohesive, elegant terminal experience.
 
-# --- config:prompts ---
-# remove comment to pick a theme
-# default prompt theme CharModel
-source ~/.config/zsh/themes/charModel
-# source ~/.config/zsh/themes/charMulti
-# source ~/.config/zsh/themes/charMux
+# --- theme:vim-motions ---
+# set vim motions in the terminal if using this theme
+# bindkey -v
+# export KEYTIMEOUT=1
 
-# --- config:bat ---
-# Bat color themes
-export BAT_THEME="rose-pine"
+# --- theme:env ---
+# Set the symbol for different environments
+function muxFraktur {
+    echo -n "\U0001D57E"
+}
 
-# --- config:editor ---
-export EDITOR="nvim"
-export VISUAL="nvim"
+function cancer {
+    echo -n "\u264B\uFE0E"
+}
 
-# --- config:ls/eza ---
-# Rose Pine colors for eza
-export EZA_COLORS="\
-da=38;5;246:\
-di=38;2;196;167;231:\
-ln=38;5;211:\
-ex=38;2;86;148;159:\
-*.txt=38;5;224:\
-*.md=38;5;224:\
-*.json=38;5;180:\
-*.yml=38;5;180:\
-*.yaml=38;5;180"
+ARROW_DIRECTION="»"  # Default arrow direction
 
-# --- config:fzf ---
-# default command for fzf (what it searches)
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+# --- theme:vis-updates ---
+# Initialize vcs_info for git branch display
+autoload -Uz vcs_info
+setopt prompt_subst
 
-# Default options for fzf
-export FZF_DEFAULT_OPTS='
-  --height 40%
-  --layout=reverse
-  --border
-  --preview "bat --style=numbers --color=always {}"
-  --bind "alt-enter:execute(nvim {})"
-  --color=fg:#e0def4,bg:#191724,hl:#eb6f92
-  --color=fg+:#e0def4,bg+:#26233a,hl+:#eb6f92
-  --color=info:#9ccfd8,prompt:#f6c177,pointer:#c4a7e7
-  --color=marker:#ebbcba,spinner:#eb6f92,header:#31748f
-  --color=border:#524f67,preview-bg:#1f1d2e
-'
-
-# CTRL-T options (file search)
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_CTRL_T_OPTS='--preview "bat --color=always --line-range :500 {}"'
-
-# ALT-C options (directory search)
-export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-export FZF_ALT_C_OPTS='--preview "tree -C {} | head -200"'
-
-# CTRL-R options (command history)
-export FZF_CTRL_R_OPTS='--preview "echo {}" --preview-window down:3:wrap'
-
-# --- conifg:aliases ---
-# import aliases
-if [ -f ~/.config/zsh/aliases.zsh ]; then
-        source ~/.config/zsh/aliases.zsh
-fi
-
-# --- conifg:fastfetch ---
-# Run neofetch only once per session
-if [[ ! -f /tmp/neofetch_run_$$ ]]; then
-    fastfetch
-    touch /tmp/neofetch_run_$$
-fi
-
-# --- conifg:zoxide ---
-# initialize zoxide (provides `z` and `zi`, plus completions)
-eval "$(zoxide init zsh)"
+# Configure vcs_info styles (Rosé Pine colors)
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' unstagedstr '%F{#eb6f92}*'   # display this when there are unstaged changes (love/red)
+zstyle ':vcs_info:*' stagedstr '%F{#f6c177}+'  # display this when there are staged changes (gold/yellow)
+zstyle ':vcs_info:*' actionformats '%F{5}%F{#c4a7e7}%b%F{#f6c177}|%F{#eb6f92}%a%c%u%F{5}%f '  # iris purple branch
+zstyle ':vcs_info:*' formats '%F{5}%F{#c4a7e7}%b%c%u%F{5}%f '  # iris purple branch name
+zstyle ':vcs_info:svn:*' branchformat '%b'
+zstyle ':vcs_info:svn:*' actionformats '%F{5}%F{#c4a7e7}%b%F{#eb6f92}:%F{#f6c177}%i%F{#f6c177}|%F{#eb6f92}%a%c%u%F{5}%f '
+zstyle ':vcs_info:svn:*' formats '%F{5}%F{#c4a7e7}%b%F{#eb6f92}:%F{#f6c177}%i%c%u%F{5}%f '
+zstyle ':vcs_info:*' enable git cvs svn
 
 
-# --- config:zim ---
-ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
-# download zimfw plugin manager if missing.
-if [[ ! -e ${ZIM_HOME}/zimfw.zsh ]]; then
-  if (( ${+commands[curl]} )); then
-    curl -fsSL --create-dirs -o ${ZIM_HOME}/zimfw.zsh \
-        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
-  else
-    mkdir -p ${ZIM_HOME} && wget -nv -O ${ZIM_HOME}/zimfw.zsh \
-        https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
-  fi
-fi
+# Functions to detect if we're in Tmux or Neovim
+function in_tmux {
+    [[ -n "$TMUX" ]]
+}
 
-# Prevent double initialization of completion
-skip_global_compinit=1
-# initialize modules.
-source ${ZIM_HOME}/init.zsh
+# Custom self-insert widget to catch normal typing
+function my-self-insert() {
+  ARROW_DIRECTION="»"  # Right arrow when typing (matches charlynderLite)
+  zle self-insert
+  zle reset-prompt
+}
 
+# Custom backspace widget
+function my-backward-delete-char() {
+  ARROW_DIRECTION="«"  # Left arrow when backspacing (matches charlynderLite)
+  zle backward-delete-char
+  zle reset-prompt
+}
 
+# Navigation key widgets
+function my-backward-char() {
+  ARROW_DIRECTION="«"  # Left arrow when moving left
+  zle backward-char
+  zle reset-prompt
+}
 
-# install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated.
-if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZIM_CONFIG_FILE:-${ZDOTDIR:-${HOME}}/.zimrc} ]]; then
-  source ${ZIM_HOME}/zimfw.zsh init
-fi
+function my-forward-char() {
+  ARROW_DIRECTION="»"  # Right arrow when moving right
+  zle forward-char
+  zle reset-prompt
+}
 
-# remove older command from the history if a duplicate is to be added.
-setopt HIST_IGNORE_ALL_DUPS
+function my-up-line-or-history() {
+  ARROW_DIRECTION="↑"  # Up arrow when moving up
+  zle up-line-or-history
+  zle reset-prompt
+}
 
-# remove path separator from WORDCHARS.
-WORDCHARS=${WORDCHARS//[\/]}
+function my-down-line-or-history() {
+  ARROW_DIRECTION="↓"  # Down arrow when moving down
+  zle down-line-or-history
+  zle reset-prompt
+}
 
-# --- config:zsh ---
-# zsh-autosuggestions
-ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+# Create the widgets
+zle -N my-backward-delete-char
+zle -N my-self-insert
+zle -N my-backward-char
+zle -N my-forward-char
+zle -N my-up-line-or-history
+zle -N my-down-line-or-history
 
-# customize the highlighting style that the suggestions are shown with.
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
+# Bind the widgets
+bindkey '^?' my-backward-delete-char  # Backspace
+bindkey '^H' my-backward-delete-char  # Ctrl+H
 
-# zsh-history-substring-search
-zmodload -F zsh/terminfo +p:terminfo
+# Only bind arrow keys when NOT in completion menu
+# Bind navigation keys (primary sequences)
+bindkey -M emacs '^[[D' my-backward-char       # Left arrow
+bindkey -M emacs '^[[C' my-forward-char        # Right arrow
+bindkey -M emacs '^[[A' my-up-line-or-history  # Up arrow
+bindkey -M emacs '^[[B' my-down-line-or-history # Down arrow
 
-# zsh-syntax-highlighting
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+# Alternative sequences for different terminals
+bindkey -M emacs '^[OD' my-backward-char       # Left arrow (alternative)
+bindkey -M emacs '^[OC' my-forward-char        # Right arrow (alternative)
+bindkey -M emacs '^[OA' my-up-line-or-history  # Up arrow (alternative)
+bindkey -M emacs '^[OB' my-down-line-or-history # Down arrow (alternative)
 
-# customize the main highlighter styles.
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[comment]='fg=242'
+# Override the default self-insert to catch normal typing
+# Only bind in emacs mode, not in menuselect
+for key in {a..z} {A..Z} {0..9}; do
+  bindkey -M emacs "$key" my-self-insert
+done
 
-# --- config:hidden ---
-# use degit instead of git as the default tool to install and update modules.
-# zstyle ':zim:zmodule' use 'degit'
+# Common symbols - only in emacs mode
+bindkey -M emacs ' ' my-self-insert
+bindkey -M emacs '.' my-self-insert
+bindkey -M emacs ',' my-self-insert
+bindkey -M emacs '!' my-self-insert
+bindkey -M emacs '?' my-self-insert
+bindkey -M emacs ':' my-self-insert
+bindkey -M emacs ';' my-self-insert
+
+# --- theme:precmd ---
+# Function to update vcs_info and reset arrow after command
+theme_precmd() {
+  vcs_info
+  # Reset arrow to default after command execution (matches charlynderLite)
+  ARROW_DIRECTION="»"
+}
+
+# Function to get current arrow (ensures variable expansion)
+function get_arrow {
+  echo -n "${ARROW_DIRECTION}"
+}
+
+# --- theme:prompt ---
+# Function to build the appropriate prompt (Rosé Pine colors)
+function build_prompt {
+    local prompt_str=""
+    local env_indicators=""
+
+    # Add environment indicators with Rosé Pine colors
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        env_indicators+="%F{#9ccfd8}(py:$(basename $VIRTUAL_ENV))%f "  # foam (cyan)
+    fi
+
+    if [[ -n "$CONDA_DEFAULT_ENV" ]]; then
+        env_indicators+="%F{#f6c177}(conda:${CONDA_DEFAULT_ENV})%f "  # gold
+    fi
+
+    if [[ -n "$AWS_PROFILE" ]]; then
+        env_indicators+="%F{#eb6f92}[aws:${AWS_PROFILE}]%f "  # love (rose/red)
+    fi
+
+    if [[ -f /.dockerenv ]]; then
+        env_indicators+="%F{#c4a7e7}[docker]%f "  # iris (purple)
+    fi
+
+    if [[ -n "$KUBECTL_CONTEXT" ]]; then
+        env_indicators+="%F{#31748f}[k8s:${KUBECTL_CONTEXT}]%f "  # pine (teal)
+    fi
+
+    if [[ -n "$SSH_CONNECTION" ]]; then
+        env_indicators+="%F{#ebbcba}[ssh:%m]%f "  # rose (lighter rose)
+    fi
+
+    # java environment
+    if [[ -n "$JAVA_HOME" ]]; then
+        env_indicators+="%F{#f6c177}(java:$(basename $JAVA_HOME))%f "  # gold
+    fi
+
+    # Checks if the user is in tmux
+    if in_tmux; then
+        prompt_str=" $(muxFraktur) [%F{#9ccfd8}%~%f] %{$reset_color%}${vcs_info_msg_0_}%{$reset_color%}$(get_arrow) "
+    else
+        prompt_str=" $(cancer) [%F{#907aa9}%n%f: %~] %{$reset_color%}${vcs_info_msg_0_}%{$reset_color%} ${ARROW_DIRECTION} "
+    fi
+
+    echo -n "$prompt_str"
+}
+
+# Set up the prompt with dynamic detection
+PROMPT='$(build_prompt)'
+
+# Add the precmd hook to update git info automatically
+# Note: add-zsh-hook is already loaded by Zim, no need to autoload it again
+add-zsh-hook precmd theme_precmd

@@ -99,17 +99,18 @@ zle -N my-down-line-or-history
 bindkey '^?' my-backward-delete-char  # Backspace
 bindkey '^H' my-backward-delete-char  # Ctrl+H
 
+# Only bind arrow keys when NOT in completion menu
 # Bind navigation keys (primary sequences)
-bindkey '^[[D' my-backward-char       # Left arrow
-bindkey '^[[C' my-forward-char        # Right arrow
-bindkey '^[[A' my-up-line-or-history  # Up arrow
-bindkey '^[[B' my-down-line-or-history # Down arrow
+bindkey -M emacs '^[[D' my-backward-char       # Left arrow
+bindkey -M emacs '^[[C' my-forward-char        # Right arrow
+bindkey -M emacs '^[[A' my-up-line-or-history  # Up arrow
+bindkey -M emacs '^[[B' my-down-line-or-history # Down arrow
 
 # Alternative sequences for different terminals
-bindkey '^[OD' my-backward-char       # Left arrow (alternative)
-bindkey '^[OC' my-forward-char        # Right arrow (alternative)
-bindkey '^[OA' my-up-line-or-history  # Up arrow (alternative)
-bindkey '^[OB' my-down-line-or-history # Down arrow (alternative)
+bindkey -M emacs '^[OD' my-backward-char       # Left arrow (alternative)
+bindkey -M emacs '^[OC' my-forward-char        # Right arrow (alternative)
+bindkey -M emacs '^[OA' my-up-line-or-history  # Up arrow (alternative)
+bindkey -M emacs '^[OB' my-down-line-or-history # Down arrow (alternative)
 
 # Override the default self-insert to catch normal typing
 for key in {a..z} {A..Z} {0..9}; do
@@ -188,5 +189,5 @@ function build_prompt {
 PROMPT='$(build_prompt)'
 
 # Add the precmd hook to update git info automatically
-autoload -U add-zsh-hook
+# Note: add-zsh-hook is already loaded by Zim, no need to autoload it again
 add-zsh-hook precmd theme_precmd

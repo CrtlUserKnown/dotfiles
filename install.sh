@@ -43,7 +43,7 @@ install_gum
       \ \  \____\ \  \ \  \ \  \ \  \ \  \\  \\ \  \_| \ \  \ \  \____\ \  \_|\ \ 
        \ \_______\ \__\ \__\ \__\ \__\ \__\\ _\\ \__\   \ \__\ \_______\ \_______\
         \|_______|\|__|\|__|\|__|\|__|\|__|\|__|\|__|    \|__|\|_______|\|_______|
-EOF
+    EOF
 
     # --- git:setup ---
     # prompt user to setup git
@@ -56,12 +56,12 @@ EOF
         git config --global user.name "$git_username"
         git config --global user.email "$git_email"
         gum style --foreground 34 --border thick --padding "1" --margin "1" <<EOF
-✅ Git has been configured with the provided username and email.
-EOF
+        ✅ Git has been configured with the provided username and email.
+        EOF
     else
         gum style --foreground 208 --border thick --padding "1" --margin "1" <<EOF
-⚠️ Skipping Git setup. You can configure it later using 'git config --global'.
-EOF
+        ⚠️ Skipping Git setup. You can configure it later using 'git config --global'.
+        EOF
     fi
 
     # --- package manager:homebrew ---
@@ -156,12 +156,12 @@ EOF
                         ;;
                 esac
             done
-            
+
             selected_option=$(gum choose --header "Select a Zsh prompt theme:" --height 15 "${theme_options[@]}")
-            
+
             # Extract just the theme name (before the dash if description exists)
             selected_theme=$(echo "$selected_option" | awk '{print $1}')
-            
+
             # modify the .zshrc file to use the selected theme
             if [ -n "$selected_theme" ]; then
                 gum spin --spinner dot --title "Setting Zsh prompt theme to $selected_theme..." -- bash -c "sed -i '' 's/^ZSH_THEME=.*/ZSH_THEME=\"$selected_theme\"/' ~/.zshrc"
