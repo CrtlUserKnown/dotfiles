@@ -4,30 +4,30 @@
 # date created: 08.28.2025
 
 # --- alias:functionality ---
-alias -g cls="command clear"
-alias -g ls="command eza --color=always"
-alias -g la="command eza -al --icons --color=always"
-alias -g ll="command eza -l --icons color=always"
-alias -g reload="source ~/.zshrc"
+alias cls="command clear"
+alias ls="command eza --color=always"
+alias la="command eza -al --icons --color=always"
+alias ll="command eza -l --icons color=always"
+alias reload="source ~/.zshrc"
 
 # --- alias:homebrew ---
-alias -g update="brew update"
-alias -g upgrade="brew upgrade"
-alias -g remove="brew uninstall"
-alias -g search="brew search"
+alias update="brew update"
+alias upgrade="brew upgrade"
+alias remove="brew uninstall"
+alias search="brew search"
 
 # --- alias:programming ---
-alias -g y="yazi"
-alias -g py="python3"
-alias -g ipy="ipython3"
-alias -g spi="swift package init"
-alias -g sps="swift package show-dependencies"
-alias -g spt="swift package test"
-alias -g srn="swift run"
-alias -g jv="java"
-alias -g jc="javac"
-alias -g rn="rustc"
-alias -g cr="cargo run"
+alias y="yazi"
+alias py="python3"
+alias ipy="ipython3"
+alias spi="swift package init"
+alias sps="swift package show-dependencies"
+alias spt="swift package test"
+alias srn="swift run"
+alias jv="java"
+alias jc="javac"
+alias rn="rustc"
+alias cr="cargo run"
 
 # --- alias:functions
 function download() {
@@ -60,7 +60,29 @@ function muxcon() {
     ${EDITOR:-nvim} ~/development/dotfiles/src/tmux/tmux.conf
 }
 
+function ghostcon() {
+    # open the ghost configuration file in the default editor (neovim)
+    ${EDITOR:-nvim} ~/development/dotfiles/src/ghostty/config
+}
+
+function aliascon() {
+    # open the aliases configuration file in the default editor (neovim)
+    ${EDITOR:-nvim} ~/development/dotfiles/src/zsh/aliases.zsh
+}
+
+function attach() {
+    # Attach to an existing tmux session
+    if tmux list-sessions &> /dev/null; then
+        local session=$(tmux list-sessions | cut -d: -f1 | fzf)
+        if [ -n "$session" ]; then
+            tmux attach-session -t "$session"
+        fi
+    else
+        echo "No tmux sessions found"
+    fi
+}
+
 # --- alias:application ---
-alias -g mux="command tmux"
-alias -g b="command btop"
-alias -g f="fzf"
+alias mux="command tmux"
+alias b="command btop"
+alias f="fzf"

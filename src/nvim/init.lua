@@ -1,7 +1,6 @@
 -- set leader keys before anything else
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-vim.opt.timeoutlen = 2000 -- better timeout lenght
 
 -- --- config:load
 -- highlight current line number

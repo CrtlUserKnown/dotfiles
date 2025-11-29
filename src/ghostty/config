@@ -19,7 +19,7 @@ shell-integration-features = no-cursor,sudo,title
 theme = "Cursor Dark"
 background-blur = true
 background-blur-radius = 18
-background-opacity = 0.8
+background-opacity = 0.9
 
 # --- Rose Pine Color Scheme ---
 background = 191724
@@ -54,3 +54,7 @@ window-padding-balance = true
 # --- Cursor ---
 cursor-style = block
 cursor-style-blink = true
+
+# Quick terminal toggle
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
+

@@ -174,7 +174,7 @@ return {
             telescope.setup({
                 defaults = {
                     prompt_prefix = ' 🔎  ',
-                    selection_caret = '❯',
+                    selection_caret = '▸',
                 },
                 extensions = {
                     file_browser = {
@@ -279,6 +279,23 @@ return {
         "goolord/alpha-nvim",
         config = function ()
             require('alpha-config')
+        end
+    },
+
+    -- Typst Preview (browser-based preview with low latency)
+    {
+        'chomosuke/typst-preview.nvim',
+        ft = 'typst',
+        version = '1.*',
+        build = function()
+            require('typst-preview').update()
+        end,
+        opts = {},
+        config = function()
+            -- Create custom commands for Typst preview
+            vim.api.nvim_create_user_command('TP', 'TypstPreview', { desc = 'Start Typst preview' })
+            vim.api.nvim_create_user_command('TS', 'TypstPreviewStop', { desc = 'Stop Typst preview' })
+            vim.api.nvim_create_user_command('TU', 'TypstPreviewUpdate', { desc = 'Update Typst preview' })
         end
     },
 
