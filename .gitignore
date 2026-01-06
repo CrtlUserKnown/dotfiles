@@ -1,5 +1,7 @@
 # editors
-.DS_Store
+./.DS_Store
+./*/.DS_Store
+./*/*/.DS_Store
 
 # Ignore tmux plugin repos
-tmux/plugins/
+./src/tmux/plugins/
