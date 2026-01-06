@@ -1,29 +1,22 @@
-# Charlyder Dotfiles
+# CrtlUserKnown Dotfiles
 
 ### Themes
 
-Dotfiles has costume [Oh My Zsh!](https://ohmyz.sh/) themes that come with it.
+Char Model: [Char Model zsh prompt theme](./src/zsh/zsh/themes/charlynderModel)
 
-CharlynderModel: [/oh-my-zsh/charlynderModel.zsh-theme](/oh-my-zsh/charlynderModel.zsh-theme) \
-CharlynderLite : [/oh-my-zsh/charlynderLite.zsh-theme](/oh-my-zsh/charlynderLite.zsh-theme)
-
-### Configs
-
-- ZSH config on `Mac` & `Linux`: [/zsh/](/zsh/.zshrc)
-- Use Starship with PowerShell on `Windows`: [powershell](/powershell/Microsoft.PowerShell_profile.ps1)
-- Neovim config all systems: [/nvim/](/nvim/)
-
-[Charlynder Model](/oh-my-zsh/charlynderModel.zsh-theme)
-
-
-
-[Charlynder Lite](/oh-my-zsh/charlynderLite.zsh-theme)
+Char Multi : [Char Multi zsh prompt theme](./src/zsh/zsh/themes/charMulti)
 
 ### Configs
 
-ZSH config on `Mac` & `Linux`: [/zsh/](/zsh/.zshrc)
+Dotfiles comes with configurations for zsh, PowerShell, TMUX, Ghostty, and more! Great for any new user!
 
-Use Starship with PowerShell on `Windows`: [powershell](/powershell/Microsoft.PowerShell_profile.ps1)
+ZSH configuration for `Mac` & `Linux`: [ZSH](/zsh/.zshrc)
 
-Neovim config all systems: [/nvim/](/nvim/)
+Use Starship with PowerShell on `Windows`: [PowerShell](./assets/otherOS/powershell/Microsoft.PowerShell_profile.ps1)
+
+Tmux configuration: [TMUX](./src/tmux/tmux.conf)
+
+Ghostty configuration: [Ghostty](./src/ghostty/config)
+
+Neovim config (moved to New repo): [Charvim](https://github.com/CrtlUserKnown/Charvim)
 
