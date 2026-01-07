@@ -38,7 +38,7 @@ install_gum
       --padding "1 2" << 'EOF'
       ________ ___ _   _  _   __  ___ ___  _  ____  _  __  _   _  _   _
      / _/_   _| _ \ | | || |/' _/| __| _ \| |/ /  \| |/__\| | | ||  \| |
-    | \__ | | | v / | | \/ |`._`.| _|| v /|  <|  | ' | \/ | 'V' ||   ' |
+    | \__ | | | v / | | \/ |\`._\`.| _|| v /|  <|  | ' | \/ | 'V' ||   ' |
      \__/ |_| |_|_\___\\__/ |___/|___|_|_\|_|\_\_|\__|\__/!_/ \_!|_|\__|
      dotfiles
     EOF
@@ -127,35 +127,37 @@ install_gum
     # --- verification:Check ---
     # verify that the files are working correctly
     gum spin --spinner dot --title "Verifying installation..." -- bash -c '
-    all_good=true
+        all_good=true
 
-    # Check .config symlinks
-    for dir in bat fastfetch ghostty tmux zsh; do
-        if [ ! -L ~/.config/$dir ]; then
-            echo "âš ï¸ Missing symlink: ~/.config/$dir"
+        # Check .config symlinks
+        for dir in bat fastfetch ghostty tmux zsh; do
+            if [ ! -L ~/.config/$dir ]; then
+                echo "⚠️ Missing symlink: ~/.config/$dir"
+                all_good=false
+            fi
+        done
+
+        # Check home directory symlinks
+        if [ ! -L ~/.zshrc ]; then
+            echo "⚠️ Missing symlink: ~/.zshrc"
             all_good=false
         fi
-    done
 
-    # Check home directory symlinks
-    if [ ! -L ~/.zshrc ]; then
-        echo "âš ï¸ Missing symlink: ~/.zshrc"
-        all_good=false
-    fi
+        # Check if dotfiles repo exists
+        if [ ! -d ~/.dots/.git ]; then
+            echo "⚠️ Dotfiles repository not properly cloned"
+            all_good=false
+        fi
 
-    # Check if dotfiles repo exists
-    if [ ! -d ~/.dots/.git ]; then
-        echo "âš ï¸ Dotfiles repository not properly cloned"
-        all_good=false
-    fi
+        if [ "$all_good" = true ]; then
+            echo "✅ All configuration files verified successfully"
+        else
+            echo "⚠️ Some files are missing or not properly linked"
+            exit 1
+        fi
+    '
+    sleep 1
 
-    if [ "$all_good" = true ]; then
-        echo "âœ… All configuration files verified successfully"
-    else
-        echo "âš ï¸ Some files are missing or not properly linked"
-        exit 1
-    fi
-'
 )
 
 # --- Charfiles:finish ---
