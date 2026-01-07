@@ -36,33 +36,12 @@ install_gum
       --foreground 141 \
       --align center \
       --padding "1 2" << 'EOF'
-    ________  ___  ___  ________  ________  ________ ___  ___       _______      
-    |\   ____\|\  \|\  \|\   __  \|\   __  \|\  _____\\  \|\  \     |\  ___ \     
-    \ \  \___|\ \  \\\  \ \  \|\  \ \  \|\  \ \  \__/\ \  \ \  \    \ \   __/|    
-     \ \  \    \ \   __  \ \   __  \ \   _  _\ \   __\\ \  \ \  \    \ \  \_|/__  
-      \ \  \____\ \  \ \  \ \  \ \  \ \  \\  \\ \  \_| \ \  \ \  \____\ \  \_|\ \ 
-       \ \_______\ \__\ \__\ \__\ \__\ \__\\ _\\ \__\   \ \__\ \_______\ \_______\
-        \|_______|\|__|\|__|\|__|\|__|\|__|\|__|\|__|    \|__|\|_______|\|_______|
+      ________ ___ _   _  _   __  ___ ___  _  ____  _  __  _   _  _   _
+     / _/_   _| _ \ | | || |/' _/| __| _ \| |/ /  \| |/__\| | | ||  \| |
+    | \__ | | | v / | | \/ |`._`.| _|| v /|  <|  | ' | \/ | 'V' ||   ' |
+     \__/ |_| |_|_\___\\__/ |___/|___|_|_\|_|\_\_|\__|\__/!_/ \_!|_|\__|
+     dotfiles
     EOF
-
-    # --- git:setup ---
-    # prompt user to setup git
-    if gum confirm "Do you want to set up Git now?"; then
-        # prompt for user name
-        git_username=$(gum input --placeholder "Enter your Git username" --prompt "Username: ")
-        # prompt for user email
-        git_email=$(gum input --placeholder "Enter your Git email" --prompt "Email: ")
-        # set git config
-        git config --global user.name "$git_username"
-        git config --global user.email "$git_email"
-        gum style --foreground 34 --border thick --padding "1" --margin "1" <<EOF
-        ✅ Git has been configured with the provided username and email.
-        EOF
-    else
-        gum style --foreground 208 --border thick --padding "1" --margin "1" <<EOF
-        ⚠️ Skipping Git setup. You can configure it later using 'git config --global'.
-        EOF
-    fi
 
     # --- package manager:homebrew ---
     # install Homebrew on to the system
@@ -70,14 +49,14 @@ install_gum
         echo "☕️ Homebrew is already installed."
     else
         echo "🚀 Homebrew not found. Installing..."
-        
+
         # download the installer script first
         gum spin --spinner dot --title "Downloading Homebrew installer..." -- \
             curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o /tmp/homebrew_install.sh
-        
+
         # run the installer (needs to be interactive)
         gum spin --spinner dot --title "Running Homebrew installer..." -- /bin/bash /tmp/homebrew_install.sh
-        
+
         # Clean up
         rm -f /tmp/homebrew_install.sh
 
@@ -105,14 +84,14 @@ install_gum
         echo "✅ Config directory already exists!"
     fi
 
-    # --- configuration:Charfiles ---
-    # make charfiles directory
-    if [ ! -d ~/.charfiles ]; then
-        gum spin --spinner dot --title "Making Charfiles directory..." -- \
-                bash -c "mkdir -p ~/.charfiles && git clone https://github.com/Charlynder/Charfiles.git ~/.charfiles"
+    # --- configuration:Dotfiles ---
+    # make dotfiles directory
+    if [ ! -d ~/.dots ]; then
+        gum spin --spinner dot --title "Making Dotfiles directory (~/.dots)..." -- \
+                bash -c "mkdir -p ~/.dots && git clone https://github.com/CtrlUserKnown/dotfiles.git ~/.dots"
         sleep 1
     else
-        echo "Charfiles directory has already been created ✅"
+        echo "Dotfiles directory has already been created ✅"
     fi
 
     # --- packages:Brewfile ---
@@ -127,77 +106,56 @@ install_gum
     fi
 
     # --- configuration:Edits ---
-    # remove the install script, readme file, and changelog file from the installation
-    rm -rf ~/.charfiles/install.sh
-    rm -rf ~/.charfiles/README.md
-    rm -rf ~/.charfiles/CHANGELOG.md
-
-    # --- configuration:Prompts ---
-    # prompt user for which prompt theme to use
-    # list of available themes from the ./src/zsh/themes directory
-    if [ -d "./src/zsh/themes" ]; then
-        available_themes=($(ls ./src/zsh/themes))
-        if [ ${#available_themes[@]} -gt 0 ]; then
-            # Create theme descriptions
-            theme_options=()
-            for theme in "${available_themes[@]}"; do
-                case "$theme" in
-                    *tmux*)
-                        theme_options+=("$theme - Opens tmux by default")
-                        ;;
-                    *modal* | *mode*)
-                        theme_options+=("$theme - Modal theme that changes dynamically")
-                        ;;
-                    *multi*)
-                        theme_options+=("$theme - Multi-line prompt with detailed information")
-                        ;;
-                    *)
-                        theme_options+=("$theme")
-                        ;;
-                esac
-            done
-
-            selected_option=$(gum choose --header "Select a Zsh prompt theme:" --height 15 "${theme_options[@]}")
-
-            # Extract just the theme name (before the dash if description exists)
-            selected_theme=$(echo "$selected_option" | awk '{print $1}')
-
-            # modify the .zshrc file to use the selected theme
-            if [ -n "$selected_theme" ]; then
-                gum spin --spinner dot --title "Setting Zsh prompt theme to $selected_theme..." -- bash -c "sed -i '' 's/^ZSH_THEME=.*/ZSH_THEME=\"$selected_theme\"/' ~/.zshrc"
-                sleep 1
-            else
-                gum style --foreground 208 --border normal --padding "1" --margin "1" <<EOF
-⚠️ No theme selected. Keeping the default Zsh prompt theme.
-EOF
-            fi
-        else
-            echo "⚠️ No themes found in ./src/zsh/themes directory."
-        fi
-    else
-        echo "⚠️ Theme directory ./src/zsh/themes not found. Skipping theme selection."
-    fi
+    # zprofile will not be need since homebrew will be called in .zshrc file (only to be use during install)
+    rm -rf ~/.zprofile
 
     # --- configuration:Links ---
-    # make links for configurations
+    # create links for configurations, final form (lol)
     gum spin --spinner dot --title "Creating links for configuration files..." -- bash -c '
         # Create symlinks for .config directories
-        ln -sf ~/.charfiles/src/bat ~/.config/bat
-        ln -sf ~/.charfiles/src/fastfetch ~/.config/fastfetch
-        ln -sf ~/.charfiles/src/ghostty ~/.config/ghostty
-        ln -sf ~/.charfiles/src/tmux ~/.config/tmux
-        ln -sf ~/.charfiles/src/nvim ~/.config/nvim
-        
+        ln -sf ~/.dots/src/bat ~/.config/bat
+        ln -sf ~/.dots/src/fastfetch ~/.config/fastfetch
+        ln -sf ~/.dots/src/ghostty ~/.config/ghostty
+        ln -sf ~/.dots/src/tmux ~/.config/tmux
+
         # Create symlinks for home directory
-        ln -sf ~/.charfiles/src/zim ~/.zim
-        ln -sf ~/.charfiles/src/zsh ~/.zsh
+        ln -sf ~/.dots/src/zsh/zsh ~/.config/zsh
+        ln -sf ~/.dots/src/zsh/.zshrc ~/.zshrc
     '
     sleep 1
 
     # --- verification:Check ---
     # verify that the files are working correctly
-    gum spin --spinner dot --title "Verifying installation..." -- ls ~/.config/
-    sleep 1
+    gum spin --spinner dot --title "Verifying installation..." -- bash -c '
+    all_good=true
+
+    # Check .config symlinks
+    for dir in bat fastfetch ghostty tmux zsh; do
+        if [ ! -L ~/.config/$dir ]; then
+            echo "âš ï¸ Missing symlink: ~/.config/$dir"
+            all_good=false
+        fi
+    done
+
+    # Check home directory symlinks
+    if [ ! -L ~/.zshrc ]; then
+        echo "âš ï¸ Missing symlink: ~/.zshrc"
+        all_good=false
+    fi
+
+    # Check if dotfiles repo exists
+    if [ ! -d ~/.dots/.git ]; then
+        echo "âš ï¸ Dotfiles repository not properly cloned"
+        all_good=false
+    fi
+
+    if [ "$all_good" = true ]; then
+        echo "âœ… All configuration files verified successfully"
+    else
+        echo "âš ï¸ Some files are missing or not properly linked"
+        exit 1
+    fi
+'
 )
 
 # --- Charfiles:finish ---
@@ -207,5 +165,5 @@ gum style --foreground 200 --border normal --padding "0.5" --margin "0.5" <<EOF
 Your macOS environment has been set up with Homebrew, Git, and your configuration files.
 You can now start customizing your setup further!
 
-Thank you for using Charfiles!
+Thank you for using my dotfiles!
 EOF

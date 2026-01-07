@@ -1,13 +1,5 @@
 # CharModel zsh theme
-#
 # Date Created: 09.30.2025
-#
-# A dynamic zsh prompt theme with environment-aware styling and interactive arrow
-# indicators. Features different symbols for tmux (⚡) and standard shell (♋︎)
-# environments. Includes full git integration with branch display and real-time
-# status indicators for staged/unstaged changes. The arrow dynamically responds
-# to your actions: typing (»), deleting («), and navigating (↑↓). Styled with
-# Rosé Pine's purple color palette for a cohesive, elegant terminal experience.
 
 # --- theme:vim-motions ---
 # set vim motions in the terminal if using this theme

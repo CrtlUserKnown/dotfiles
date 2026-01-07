@@ -1,7 +1,7 @@
-# Char zshrc file
+# CtrlUserKnown zshrc configuration file
 # date created: 10.14.2025
 #
-# to find alias look at: ~/development/dotfiles/src/zsh/zsh/.aliases
+# to find alias look at: ./zsh/.aliases
 # to find functions look at: ./zsh/.functions
 
 # --- config:locale ---
@@ -174,8 +174,21 @@ then
 fi
 
 # --- config:hooks ---
-# Load add-zsh-hook utility (needed by themes)
+# Load add-zsh-hook utility
 autoload -Uz add-zsh-hook
+
+# auto ls for .config and development directories
+chpwd() {
+    # Get the absolute path of the current directory
+    local current_dir="$(pwd)"
+    local config_dir="${HOME}/.config"
+    local dev_dir="${HOME}/development"
+
+    # Check if we're in one of the target directories
+    if [[ "$current_dir" == "$config_dir" ]] || [[ "$current_dir" == "$dev_dir" ]]; then
+        ls
+    fi
+}
 
 # --- config:theme ---
 # Load theme
@@ -192,9 +205,7 @@ fi
 # initialize zoxide (provides `z` and `zi`, plus completions)
 eval "$(zoxide init zsh)"
 
-# --- config:keybindings (Final Fix) ---
-# IMPORTANT: Theme bindings must come LAST to ensure arrow keys work correctly
-# The theme handles arrow key bindings with custom widgets that update the prompt arrow
+# --- config:keybindings ---
 
 # edit command line
 autoload -Uz edit-command-line
