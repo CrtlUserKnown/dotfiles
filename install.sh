@@ -51,7 +51,7 @@ EOF
             curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o /tmp/homebrew_install.sh
 
         # run the installer (needs to be interactive)
-        gum spin --spinner dot --title "Running Homebrew installer..." -- /bin/bash /tmp/homebrew_install.sh
+        /bin/bash /tmp/homebrew_install.sh
 
         # Clean up
         rm -f /tmp/homebrew_install.sh
@@ -103,55 +103,55 @@ EOF
 
     # --- configuration:Edits ---
     # zprofile will not be need since homebrew will be called in .zshrc file (only to be use during install)
-    rm -rf ~/.zprofile
+    rm -f ~/.zprofile
 
     # --- configuration:Links ---
     # create links for configurations, final form (lol)
-    gum spin --spinner dot --title "Creating links for configuration files..." -- bash -c '
+    gum spin --spinner dot --title "Creating links for configuration files..." -- bash -c "
         # Create symlinks for .config directories
-        ln -sf ~/.dots/src/bat ~/.config/bat
-        ln -sf ~/.dots/src/fastfetch ~/.config/fastfetch
-        ln -sf ~/.dots/src/ghostty ~/.config/ghostty
-        ln -sf ~/.dots/src/tmux ~/.config/tmux
+        ln -sf $HOME/.dots/src/bat $HOME/.config/bat
+        ln -sf $HOME/.dots/src/fastfetch $HOME/.config/fastfetch
+        ln -sf $HOME/.dots/src/ghostty $HOME/.config/ghostty
+        ln -sf $HOME/.dots/src/tmux $HOME/.config/tmux
 
         # Create symlinks for home directory
-        ln -sf ~/.dots/src/zsh/zsh ~/.config/zsh
-        ln -sf ~/.dots/src/zsh/.zshrc ~/.zshrc
-    '
+        ln -sf $HOME/.dots/src/zsh/zsh $HOME/.config/zsh
+        ln -sf $HOME/.dots/src/zsh/.zshrc $HOME/.zshrc
+    "
     sleep 1
 
     # --- verification:Check ---
     # verify that the files are working correctly
-    gum spin --spinner dot --title "Verifying installation..." -- bash -c '
+    gum spin --spinner dot --title "Verifying installation..." -- bash -c "
         all_good=true
 
         # Check .config symlinks
         for dir in bat fastfetch ghostty tmux zsh; do
-            if [ ! -L ~/.config/$dir ]; then
-                echo "⚠️ Missing symlink: ~/.config/$dir"
+            if [ ! -L $HOME/.config/\$dir ]; then
+                echo \"⚠️ Missing symlink: $HOME/.config/\$dir\"
                 all_good=false
             fi
         done
 
         # Check home directory symlinks
-        if [ ! -L ~/.zshrc ]; then
-            echo "⚠️ Missing symlink: ~/.zshrc"
+        if [ ! -L $HOME/.zshrc ]; then
+            echo \"⚠️ Missing symlink: $HOME/.zshrc\"
             all_good=false
         fi
 
         # Check if dotfiles repo exists
-        if [ ! -d ~/.dots/.git ]; then
-            echo "⚠️ Dotfiles repository not properly cloned"
+        if [ ! -d $HOME/.dots/.git ]; then
+            echo \"⚠️ Dotfiles repository not properly cloned\"
             all_good=false
         fi
 
-        if [ "$all_good" = true ]; then
-            echo "✅ All configuration files verified successfully"
+        if [ \"\$all_good\" = true ]; then
+            echo \"✅ All configuration files verified successfully\"
         else
-            echo "⚠️ Some files are missing or not properly linked"
+            echo \"⚠️ Some files are missing or not properly linked\"
             exit 1
         fi
-    '
+    "
     sleep 1
 
 )
