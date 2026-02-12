@@ -1,8 +1,8 @@
 # CtrlUserKnown zshrc configuration file
 # date created: 10.14.2025
 #
-# to find alias look at: ./zsh/.aliases
-# to find functions look at: ./zsh/.functions
+# to find alias look at: ~/.config/zsh/.aliases
+# to find functions look at: ~/.config/zsh/.functions
 
 # --- config:locale ---
 export LANG=en_US.UTF-8

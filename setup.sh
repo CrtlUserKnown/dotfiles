@@ -158,8 +158,8 @@ EOF
     # install Homebrew files if the packages do not exist on the system
     # compare the installed files with the Brewfile and brew list
     # if the package is missing, install it
-    if [ -f "./Brewfile" ]; then
-        run_with_spinner "Installing packages from Brewfile..." brew bundle --file=./Brewfile
+    if [ -f "./assets/Brewfile" ]; then
+        run_with_spinner "Installing packages from Brewfile..." brew bundle --file=./assets/Brewfile
         echo "✅ Brewfile packages installation complete."
     else
         echo "⚠️ No Brewfile found in the current directory. Skipping package installation."

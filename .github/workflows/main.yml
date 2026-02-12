@@ -10,11 +10,11 @@ on:
 jobs:
   test-install:
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up test environment
         run: |
           echo "Setting up test environment..."
@@ -22,15 +22,15 @@ jobs:
           rm -rf ~/.config/bat ~/.config/fastfetch ~/.config/ghostty ~/.config/tmux ~/.config/zsh
           rm -f ~/.zshrc ~/.zprofile
           rm -rf ~/.dots
-      
+
       - name: Make install script executable
         run: chmod +x install.sh
-      
+
       - name: Run install script
         run: ./install.sh
         env:
           CI: true
-      
+
       - name: Verify Homebrew installation
         run: |
           if command -v brew &> /dev/null; then
@@ -40,7 +40,7 @@ jobs:
             echo "❌ Homebrew installation failed"
             exit 1
           fi
-      
+
       - name: Verify gum installation
         run: |
           if command -v gum &> /dev/null; then
@@ -50,7 +50,7 @@ jobs:
             echo "❌ Gum installation failed"
             exit 1
           fi
-      
+
       - name: Verify .config directory
         run: |
           if [ -d ~/.config ]; then
@@ -60,7 +60,7 @@ jobs:
             echo "❌ .config directory not created"
             exit 1
           fi
-      
+
       - name: Verify dotfiles repository
         run: |
           if [ -d ~/.dots/.git ]; then
@@ -70,12 +70,12 @@ jobs:
             echo "❌ Dotfiles repository not cloned properly"
             exit 1
           fi
-      
+
       - name: Verify config symlinks
         run: |
           echo "Checking symlinks..."
           all_good=true
-          
+
           # Check .config symlinks
           for dir in bat fastfetch ghostty tmux zsh; do
             if [ -L ~/.config/$dir ]; then
@@ -86,7 +86,7 @@ jobs:
               all_good=false
             fi
           done
-          
+
           # Check home directory symlinks
           if [ -L ~/.zshrc ]; then
             target=$(readlink ~/.zshrc)
@@ -95,16 +95,16 @@ jobs:
             echo "❌ Missing symlink: ~/.zshrc"
             all_good=false
           fi
-          
+
           if [ "$all_good" = false ]; then
             exit 1
           fi
-      
+
       - name: Verify symlinks point to valid targets
         run: |
           echo "Verifying symlink targets..."
           all_good=true
-          
+
           for dir in bat fastfetch ghostty tmux zsh; do
             if [ -e ~/.config/$dir ]; then
               echo "✅ ~/.config/$dir points to valid target"
@@ -113,18 +113,18 @@ jobs:
               all_good=false
             fi
           done
-          
+
           if [ -e ~/.zshrc ]; then
             echo "✅ ~/.zshrc points to valid target"
           else
             echo "❌ ~/.zshrc is a broken symlink"
             all_good=false
           fi
-          
+
           if [ "$all_good" = false ]; then
             exit 1
           fi
-      
+
       - name: Verify .zprofile cleanup
         run: |
           if [ ! -f ~/.zprofile ]; then
@@ -132,7 +132,7 @@ jobs:
           else
             echo "⚠️ .zprofile still exists (may be expected if brew added it back)"
           fi
-      
+
       - name: Test Brewfile packages installation
         run: |
           if [ -f "./Brewfile" ]; then
@@ -142,13 +142,13 @@ jobs:
           else
             echo "⚠️ No Brewfile found to verify"
           fi
-      
+
       - name: Test idempotency (run script again)
         run: |
           echo "Testing idempotency - running install script again..."
           ./install.sh
           echo "✅ Script can be run multiple times without errors"
-      
+
       - name: Final verification
         run: |
           echo "=== Final System State ==="
@@ -168,22 +168,22 @@ jobs:
 
   test-without-brewfile:
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Remove Brewfile to test fallback
         run: rm -f Brewfile
-      
+
       - name: Make install script executable
         run: chmod +x install.sh
-      
+
       - name: Run install script without Brewfile
         run: ./install.sh
         env:
           CI: true
-      
+
       - name: Verify installation still works
         run: |
           if [ -d ~/.config ] && [ -d ~/.dots ]; then
