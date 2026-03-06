@@ -117,9 +117,11 @@ EOF
 
         # Add Homebrew to PATH if necessary
         if [[ -d "/opt/homebrew/bin" ]]; then
+            # shellcheck disable=SC2016
             echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
             eval "$(/opt/homebrew/bin/brew shellenv)"
         elif [[ -d "/usr/local/bin/brew" ]]; then
+            # shellcheck disable=SC2016
             echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
             eval "$(/usr/local/bin/brew shellenv)"
         fi

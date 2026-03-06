@@ -87,6 +87,8 @@ setopt EXTENDED_GLOB
 setopt AUTO_CD
 
 # --- config:completions ---
+# shellcheck shell=zsh
+
 # Set up fpath for completions (add zsh-completions if installed via Homebrew)
 if [[ -d "/opt/homebrew/share/zsh-completions" ]]; then
   fpath=(/opt/homebrew/share/zsh-completions $fpath)
