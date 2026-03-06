@@ -2,7 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.3] - 2025-03-27
+## [0.3.0] - 2026-03-06
+
+### Added
+- Zsh functions for enhanced terminal productivity
+- GitHub Actions workflow for automated install script testing
+- Configuration for `bat` (cat clone with wings)
+- Configuration for macOS terminal
+
+### Changed
+- Major restructuring: moved configuration files into the `src/` directory for better organization
+- Updated Tmux keybindings for improved workflow
+- Improved `fzf` configuration within `.zshrc`
+- Refined Neovim statusline and cmdline (prior to migration)
+
+### Fixed
+- Resolved various bugs in Tmux, Neovim, and Zsh
+- Fixed Ghostty padding and theme consistency issues
+- Corrected Zsh alias issues and `ls` command bugs
+- Fixed multiple syntax errors and logic issues in `install.sh` / `setup.sh`
+
+### Removed
+- Neovim configuration (migrated to standalone repository: `CtrlUserKnown/Charvim`)
+- `zimfw` to resolve completion errors, favor of framework-integrated completions
+
+## [0.2.0] - 2025-10-03
 
 ### Added
 - Oh-my-zsh added for plugin support in zsh
