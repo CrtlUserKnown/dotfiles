@@ -1,4 +1,3 @@
-# shellcheck shell=zsh
 # CtrlUserKnown zshrc configuration file
 # date created: 10.14.2025
 #
