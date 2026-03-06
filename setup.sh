@@ -75,6 +75,32 @@ run_with_spinner() {
 # install gum if missing (but continue if it fails)
 install_gum
 
+# Check macOS version
+check_os_version() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        OS_VERSION=$(sw_vers -productVersion)
+        MAJOR_VERSION=$(echo "$OS_VERSION" | cut -d. -f1)
+        
+        if [ "$MAJOR_VERSION" -lt 12 ]; then
+            echo "⚠️ Warning: You are running macOS $OS_VERSION."
+            echo "This setup is optimized for macOS 12.0 (Monterey) and newer."
+            echo "Some tools, like Ghostty, may not be compatible with your system."
+            
+            if [ -z "$CI" ]; then
+                if command -v gum &> /dev/null; then
+                    gum confirm "Do you want to continue anyway?" || exit 0
+                else
+                    read -p "Do you want to continue anyway? (y/n) " -n 1 -r
+                    echo
+                    [[ ! $REPLY =~ ^[Yy]$ ]] && exit 0
+                fi
+            fi
+        fi
+    fi
+}
+
+check_os_version
+
 (
     # --- script:Banner ---
     if command -v gum &> /dev/null; then
