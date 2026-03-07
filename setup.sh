@@ -13,7 +13,7 @@ install_gum() {
 
         # Use Homebrew to install gum if available, otherwise manual install
         if command -v brew &> /dev/null; then
-            brew install gum >/dev/null 2>&1
+            timeout 30s brew install gum >/dev/null 2>&1
             return $?
         fi
 
@@ -31,7 +31,7 @@ install_gum() {
         tmpdir=$(mktemp -d)
 
         # Download and extract gum
-        if curl -sSL "https://github.com/charmbracelet/gum/releases/latest/download/gum_${OS}_${ARCH}.tar.gz" \
+        if timeout 30s curl -sSL "https://github.com/charmbracelet/gum/releases/latest/download/gum_${OS}_${ARCH}.tar.gz" \
             | tar -xz -C "$tmpdir" 2>/dev/null; then
             sudo mv "$tmpdir/gum" /usr/local/bin/gum 2>/dev/null || {
                 # Fallback if sudo fails (CI environment)
@@ -175,8 +175,22 @@ EOF
     # --- configuration:Dotfiles ---
     # make dotfiles directory
     if [ ! -d ~/.dots ]; then
-        run_with_spinner "Making Dotfiles directory (~/.dots)..." \
-                bash -c "mkdir -p ~/.dots && git clone https://github.com/CtrlUserKnown/dotfiles.git ~/.dots"
+        echo "🔧 Setting up Dotfiles (~/.dots)..."
+        
+        # Try full clone first with a 30s timeout
+        if ! timeout 30s git clone https://github.com/CtrlUserKnown/dotfiles.git ~/.dots; then
+            echo "⚠️  Standard clone timed out or failed. Trying a shallow clone..."
+            rm -rf ~/.dots # Clean up partial clone
+            
+            # Fallback: try shallow clone with a 20s timeout
+            if ! timeout 20s git clone --depth 1 https://github.com/CtrlUserKnown/dotfiles.git ~/.dots; then
+                echo "❌  Both attempts failed. Skipping dotfiles for now."
+            else
+                echo "✅  Shallow clone successful!"
+            fi
+        else
+            echo "✅  Dotfiles cloned successfully!"
+        fi
         sleep 1
     else
         echo "Dotfiles directory has already been created ✅"
@@ -187,8 +201,12 @@ EOF
     # compare the installed files with the Brewfile and brew list
     # if the package is missing, install it
     if [ -f "./assets/Brewfile" ]; then
-        run_with_spinner "Installing packages from Brewfile..." brew bundle --file=./assets/Brewfile
-        echo "✅ Brewfile packages installation complete."
+        echo "🔧 Installing packages from Brewfile..."
+        if ! timeout 40s brew bundle --file=./assets/Brewfile; then
+            echo "⚠️  Brew installation timed out or failed. You might want to run 'brew bundle --file=./assets/Brewfile' manually later."
+        else
+            echo "✅ Brewfile packages installation complete."
+        fi
     else
         echo "⚠️ No Brewfile found in the current directory. Skipping package installation."
     fi
