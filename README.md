@@ -1,4 +1,4 @@
-# Ctrlk Dotfiles
+# CtrlUserKnown Dots
 
 A professional, performance-oriented macOS development environment. This repository automates the setup of a modern terminal workflow using Homebrew, Zsh, Tmux, and Ghostty.
 
