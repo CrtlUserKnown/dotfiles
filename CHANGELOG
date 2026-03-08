@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-03-07
+
+### Added
+- Automated testing suite for `setup.sh` in the `tests/` directory
+- Timeout logic for `git clone` and `brew bundle` in `setup.sh` to prevent hangs
+- Automatic shallow clone fallback for dotfiles if a full clone times out
+
+### Changed
+- Replaced custom spinner with direct output for network-dependent tasks to improve reliability
+- Improved `install_gum` function with timeouts for better error handling
+
 ## [0.3.0] - 2026-03-06
 
 ### Added
