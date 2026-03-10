@@ -63,4 +63,6 @@ cd tests
 - **Rose Pine:** Consistent color schemes across all tools.
 
 ---
-*Neovim configuration has been migrated to its own repository: [Charvim](https://github.com/CtrlUserKnown/Charvim)*
+
+> [!TIP]
+> *Dots works well with [Charvim](https://github.com/CtrlUserKnown/Charvim): A NeoVim Distrobution*
