@@ -4,39 +4,48 @@
 
 # --- functions:devUx ---
 function commands() {
-    if [[ "$1" == "custom" ]]; then  # FIX: was 'costum'
-        echo "--- Aliases ---"
-        echo "cls        clear the terminal"
-        echo "ls         eza with color"
-        echo "lla        eza all files with icons"
-        echo "ll         eza list with icons"
-        echo "reload     source ~/.zshrc"
-        echo "y          yazi"
-        echo "py         python3"
-        echo "ipy        ipython3"
-        echo "swiftinit  swift package init"
-        echo "sps        swift package show-dependencies"
-        echo "spt        swift package test"
-        echo "jv         java"
-        echo "jc         javac"
-        echo "rn         rustc"
-        echo "cr         cargo run"
-        echo "mux        tmux"
-        echo "b          btop"
-        echo "f          fzf"
-        echo ""
-        echo "--- Functions ---"
-        echo "commands   list commands or custom aliases/functions"
-        echo "config     edit zsh, tmux, ghostty, or alias configs"
-        echo "create     scaffold a new project (Swift, Java, Rust, Crystal, Git)"
-        echo "attach     attach to a tmux session via fzf"
-        echo "duplicate  duplicate a file or folder"
-        echo "download   download a file using curl or wget"
+    if [[ "$1" == "custom" ]]; then
+        typeset -A categories
+        categories=(
+            "Navigation"   "cls:clear the terminal|ls:eza with color|la:eza all files with icons|ll:eza list with icons|y:yazi|f:fzf|b:btop"
+            "Shell"        "reload:source ~/.zshrc|mux:tmux|lz:lazygit"
+            "Python"       "py:python3|ipy:ipython3"
+            "Swift"        "swiftinit:swift package init|sps:swift package show-dependencies|spt:swift package test"
+            "Java"         "jv:java|jc:javac"
+            "Rust"         "rn:rustc|cr:cargo run"
+            "Functions"    "commands:list all commands|config:edit config files|create:scaffold a new project|attach:attach to a tmux session|duplicate:duplicate a file or folder|download:download a file"
+        )
+
+        local order=("Navigation" "Shell" "Python" "Swift" "Java" "Rust" "Functions")
+
+        for category in "${order[@]}"; do
+            echo "\n\033[1;35m[$category]\033[0m"
+            local entries=(${(s:|:)categories[$category]})
+            for entry in "${entries[@]}"; do
+                local cmd="${entry%%:*}"
+                local desc="${entry#*:}"
+                printf "  \033[1;36m%-14s\033[0m %s\n" "$cmd" "$desc"
+            done
+        done
+
     else
-        echo $PATH | tr ':' '\n' | while read dir; do
-            ls "$dir" 2>/dev/null
-        done | sort -u | grep -v '/' | grep -v '@' | column -c $(tput cols)
-        echo "\nTip: run 'commands custom' to see your custom aliases/functions"
+        # collect all system commands from PATH
+        local all_cmds
+        all_cmds=$(echo $PATH | tr ':' '\n' | while read dir; do
+            CLICOLOR=0 command ls "$dir" 2>/dev/null
+        done | sort -u | grep -v '/' | grep -v '@')
+
+        if [[ -n "$1" ]]; then
+            echo "$all_cmds" | grep "$1" | column -c $(tput cols)
+        else
+            echo "$all_cmds" | fzf \
+                --prompt="commands > " \
+                --height=50% \
+                --layout=reverse \
+                --border \
+                --preview="man {} 2>/dev/null | head -20 || echo 'no man page available'" \
+                --preview-window=right:50%
+        fi
     fi
 }
 
@@ -154,8 +163,6 @@ function attach() {
         echo "No tmux sessions found"
     fi
 }
-
-# FIX: removed duplicate chpwd — now only defined in .zshrc
 
 function duplicate() {
     if [ $# -eq 0 ]; then

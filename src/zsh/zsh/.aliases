@@ -6,9 +6,8 @@
 alias cls="command clear"
 alias ls="command eza --color=always"
 alias la="command eza -al --icons --color=always"
-alias ll="command eza -l --icons --color=always"  # FIX: was missing '=' before 'always'
+alias ll="command eza -l --icons --color=always"
 alias reload="source ~/.zshrc"
-# FIX: removed 'alias open="open ."' — it breaks 'open <file>' usage
 
 # --- alias:programming ---
 alias y="yazi"
@@ -22,6 +21,9 @@ alias jc="javac"
 alias rn="rustc"
 alias cr="cargo run"
 
+# --- alias:alias ---
+alias lz="lazygit"
+
 # --- alias:application ---
 alias mux="command tmux"
 alias b="command btop"
@@ -33,4 +35,4 @@ alias -s rs="$EDITOR"
 alias -s swift="$EDITOR"
 alias -s py="$EDITOR"
 alias -s c="$EDITOR"
-alias -s crystal="$EDITOR"
+alias -s cr="$EDITOR"
