@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-03-29
+
+### Added
+- Integrated `fzf-tab` for enhanced Zsh completions
+- Added `mux-session` function for smoother Tmux session management
+- Added MIT license to the repository
+
+### Changed
+- Refactored Zsh aliases and command functions for improved UX
+- Reworked Tmux session management and `attach` function workflow
+- Updated README with minor fixes and documentation improvements
+
+### Fixed
+- Resolved ASCII display issues in `fzf`
+- Fixed conflict between `zoxide` and Zsh configurations
+
 ## [1.0.0] - 2026-03-07
 
 This is the first stable release of the Ctrlk Dotfiles project, providing a robust and automated environment setup for macOS.
@@ -53,9 +69,34 @@ This is the first stable release of the Ctrlk Dotfiles project, providing a robu
 - Neovim config added with "pckr.vim" as the plugin manager
 - Fastfetch added to replace Neofetch
 - Added hyprland config
+- fzf config within ".zshrc"
+- Rose pine theme in Zsh, Neovim, Fastfetch, and Tmux
+- Wezterm w/ config
+- Improvements to "autoclose.lua" for Visual mode in Neovim
 
 ### Changed
 - Restructured file structure for better management during development
+- Rose pines themes for consistency in the terminal
+- Renamed some zsh files
+- Replaced "nvim-surround.vim" with updates to "autoclose.lua"
+
+### Removed
+- "nvim-surround.vim" plugin
+
+## [0.1.7] - 2025-08-03
+
+### Added
+- Ghostty w/ config
+- Rectangle WM w/ config 
+- "Lazy.vim" plugin manager added
+- Brewfile to track dependencies
+
+### Removed
+- "Pckr.vim" plugin manager due to have issues maintianing
+
+### Changed
+- Moved to "Lazy.vim" for better plugin support
+- Rewrote Ghostty config, added better theme
 
 ## [0.1.5] - 2025-06-14
 
@@ -73,35 +114,3 @@ This is the first stable release of the Ctrlk Dotfiles project, providing a robu
 - Replaced "Winnie" zsh theme with "CharlynderModel" theme as the default
 - Made better Neovim plugin & UI changes
 - Added "Tree-sitter.vim", "oil.vim", & "completions.vim" to Neovim for better usability
-
-## [0.1.7] - 2025-08-03
-
-### Added
-- Ghostty w/ config
-- Rectangle WM w/ config 
-- "Lazy.vim" plugin manager added
-- Brewfile to track dependencies
-
-### Removed
-- "Pckr.vim" plugin manager due to have issues maintianing
-
-### Changed
-- Moved to "Lazy.vim" for better plugin support
-- Rewrote Ghostty config, added better theme
-
-## [0.2.0] - 2025-10-03
-
-### Added
-- fzf config within ".zshrc"
-- Rose pine theme in Zsh, Neovim, Fastfetch, and Tmux
-- Wezterm w/ config
-- Improvements to "autoclose.lua" for Visual mode in Neovim
-
-### Removed
-- "nvim-surround.vim" plugin
-
-### Changed
-- Rose pines themes for consistency in the terminal
-- Renamed some zsh files
-- Replaced "nvim-surround.vim" with updates to "autoclose.lua"
-
